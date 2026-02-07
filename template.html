@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablet OS Mimic</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="screen">
+        <div class="wallpaper" WALLPAPER_STYLE_PLACEHOLDER></div>
+
+        <main id="homepage">
+            <div class="date-time" draggable="true" id="draggable-clock" CLOCK_STYLE_PLACEHOLDER>
+                <h1 id="clock">12:00</h1>
+                <p id="date">Monday, January 1</p>
+            </div>
+
+            <div class="app-grid">
+                <!-- Homepage apps could also be filtered here -->
+            </div>
+        </main>
+
+        <footer id="dock-container">
+            <div id="dock" class="glass">
+                {DOCK_CONTENT}
+            </div>
+        </footer>
+
+        <section id="app-drawer" class="glass">
+            <div class="drawer-handle"></div>
+            <div class="drawer-search">
+                <input type="text" placeholder="Search apps..." class="glass">
+            </div>
+            <div class="drawer-grid">
+                {DRAWER_CONTENT}
+            </div>
+        </section>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <h2>Settings</h2>
+                <div class="settings-sections">
+                    <div class="setting-group">
+                        <label>Clock Format</label>
+                        <select id="set-clock-format" class="glass">
+                            <option value="12h">12h</option>
+                            <option value="24h">24h</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Wallpaper URL</label>
+                        <input type="text" id="set-wallpaper" class="glass" placeholder="path/to/image.jpg">
+                    </div>
+                    <div class="setting-group">
+                        <label>Blur Amount</label>
+                        <input type="range" id="set-blur" min="0" max="50" class="slider">
+                    </div>
+                    <div class="setting-group">
+                        <label>Transparency</label>
+                        <input type="range" id="set-transparency" min="0" max="1" step="0.05" class="slider">
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button id="export-json" class="glass">Export Config</button>
+                    <label for="import-json" class="glass btn">Import Config</label>
+                    <input type="file" id="import-json" accept=".json" style="display:none">
+
+                    <label for="import-bookmarks" class="glass btn">Import Bookmarks</label>
+                    <input type="file" id="import-bookmarks" accept=".html" style="display:none">
+
+                    <button id="close-settings" class="glass">Close</button>
+                </div>
+
+                <div class="add-app-form">
+                    <div class="setting-group">
+                        <label>App Name</label>
+                        <input type="text" id="new-app-name" class="glass" placeholder="Google">
+                    </div>
+                    <div class="setting-group">
+                        <label>URL</label>
+                        <input type="text" id="new-app-url" class="glass" placeholder="https://...">
+                    </div>
+                    <div class="setting-group">
+                        <label>Icon</label>
+                        <input type="text" id="new-app-icon" class="glass" placeholder="🔗">
+                    </div>
+                    <button id="add-app-btn" class="glass btn">Add App</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="context-menu" class="glass">
+            <div class="menu-item" id="menu-pin">📌 Pin to Dock</div>
+            <div class="menu-item danger" id="menu-unpin" style="display:none">📍 Unpin from Dock</div>
+            <div class="menu-item danger" id="menu-delete">🗑️ Delete App</div>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 5px 0;">
+            <div class="menu-item" id="menu-choose-favicon">🎨 Choose Favicon</div>
+            <div class="menu-item" id="menu-src-reset">🔄 Restore Original Icon</div>
+        </div>
+        <div id="glass-tooltip" class="glass hidden"></div>
+
+        <!-- Favicon Picker Modal -->
+        <div id="favicon-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <h2>Choose Favicon</h2>
+                <p id="favicon-modal-app-name" style="margin-bottom: 20px; opacity: 0.7;">App Name</p>
+                <div id="favicon-grid" class="favicon-picker-grid">
+                    <!-- Icons will be injected here -->
+                    <div class="loading-spinner">Fetching icons...</div>
+                </div>
+                <div class="settings-actions">
+                    <button id="close-favicon-modal" class="glass">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

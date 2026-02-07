@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Configuration and Assets
+.env
+backups/
+apps.json
+settings.json
+index.html
+
+# Generated assets
+assets/bookmarks/
+assets/icons/
+assets/wallapapers/
+
+# If you want to keep the final output index.html versioned:
+# (Uncomment the line below if you want to ignore the generated index.html)
+# index.html

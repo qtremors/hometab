@@ -1,0 +1,589 @@
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(20px);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --dock-height: 80px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    /* Full transparency */
+    color: var(--text-primary);
+}
+
+body.modal-open {
+    overflow: hidden !important;
+}
+
+#screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wallpaper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    z-index: -1;
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+}
+
+/* Glassmorphism Utility */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none !important;
+}
+
+#glass-tooltip {
+    position: fixed;
+    pointer-events: none;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: pre-line;
+    transform: translate(-50%, -100%) translateY(-10px);
+    opacity: 0;
+}
+
+#glass-tooltip.visible {
+    opacity: 1;
+    transform: translate(-50%, -100%) translateY(-20px);
+}
+
+/* Homepage */
+#homepage {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease, filter 0.6s ease;
+}
+
+#screen.drawer-open .wallpaper {
+    transform: scale(1.1);
+    filter: blur(5px) brightness(0.7);
+}
+
+#screen.drawer-open #homepage {
+    transform: scale(0.92);
+    opacity: 0.3;
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.date-time {
+    text-align: center;
+    cursor: grab;
+    z-index: 5;
+}
+
+.date-time:active {
+    cursor: grabbing;
+}
+
+#clock {
+    font-size: 8rem;
+    font-weight: 300;
+}
+
+#date {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.widget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 200px);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.widget {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.app-icon {
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    font-size: 2.5rem;
+}
+
+.app-icon img,
+.dock-item img {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    /* Slight padding for image icons to match emoji visual weight */
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.app-icon:hover {
+    transform: scale(1.15);
+}
+
+/* Removed label styling for cleaner dock-like look */
+
+/* Dock */
+#dock-container {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#dock {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    height: var(--dock-height);
+    min-height: 80px;
+    gap: 15px;
+    border-radius: 28px;
+    width: fit-content;
+    max-width: 90%;
+}
+
+.dock-item {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), margin 0.2s;
+    font-size: 2.2rem;
+    overflow: hidden;
+}
+
+.app-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: center;
+    width: 100px;
+}
+
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.8rem;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 12px;
+}
+
+.app-label {
+    font-size: 0.85rem;
+    color: white;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    font-weight: 500;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    padding: 0 5px;
+}
+
+#dock:hover .dock-item {
+    transform: scale(1);
+}
+
+.dock-item:hover {
+    transform: scale(1.5) translateY(-10px) !important;
+}
+
+/* App Drawer */
+#app-drawer {
+    position: absolute;
+    top: 110%;
+    /* Hidden below */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    background: rgba(255, 255, 255, 0.05);
+    /* Very slight tint for blur to work well */
+    backdrop-filter: var(--glass-blur);
+    border: none;
+    overflow: hidden;
+    /* Prevent entire drawer from scrolling */
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.drawer-search {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0 20px 0;
+    z-index: 30;
+    pointer-events: none;
+    /* Allow scrolling/clicking through the container */
+}
+
+.drawer-handle {
+    display: none;
+    /* Removed to avoid clipping and container look */
+}
+
+.drawer-search input {
+    pointer-events: auto;
+    /* Re-enable for the input itself */
+    width: 400px;
+    padding: 12px 25px;
+    outline: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
+    color: white;
+    margin-bottom: 0;
+}
+
+.drawer-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 40px;
+    padding: 120px 40px 300px 40px;
+    /* Top padding clears the sticky search bar */
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    justify-items: center;
+    max-width: none;
+    /* Let column centering be handled by padding/layout */
+}
+
+.app-icon.thin {
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+}
+
+/* Animations / States */
+#screen.drawer-open #homepage {
+    transform: translateY(-50vh) scale(0.9);
+    opacity: 0.5;
+}
+
+#screen.drawer-open #app-drawer {
+    transform: translateY(-110%);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: opacity 0.3s;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.modal-content h2 {
+    margin-bottom: 30px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.settings-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.setting-group select,
+.setting-group input[type="text"] {
+    padding: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    outline: none;
+    border-radius: 8px;
+}
+
+.add-app-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 25px;
+    margin-top: 20px;
+}
+
+.add-app-form .setting-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.add-app-form .setting-group:last-of-type {
+    flex: 0 0 60px;
+}
+
+.add-app-form .btn {
+    padding: 10px 20px;
+    height: 40px;
+    white-space: nowrap;
+}
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--glass-border);
+    outline: none;
+    border-radius: 3px;
+}
+
+/* Favicon Picker Grid */
+.favicon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.favicon-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.favicon-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.favicon-option img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.favicon-option span {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    text-transform: capitalize;
+}
+
+.loading-spinner {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: white;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.settings-actions {
+    display: flex;
+    flex-direction: row;
+    /* Horizontal actions for cleaner look */
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.settings-actions button,
+.settings-actions .btn {
+    padding: 10px 15px;
+    flex: 1;
+    min-width: 120px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.settings-actions button:hover,
+.settings-actions .btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Drag and Drop Styles */
+.dock-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.8);
+}
+
+.dock-item.over {
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+}
+
+/* Context Menu */
+#context-menu {
+    position: fixed;
+    z-index: 1000;
+    width: 180px;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 6px 0;
+    display: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.menu-item {
+    padding: 12px 18px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: white;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.menu-item.danger {
+    color: #ff5555;
+}
+
+.menu-item.danger:hover {
+    background: rgba(255, 85, 85, 0.2);
+}
