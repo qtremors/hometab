@@ -147,13 +147,14 @@ body.modal-open {
 }
 
 .app-icon {
-    width: 80px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    gap: 10px;
     cursor: pointer;
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    font-size: 2.5rem;
+    text-align: center;
+    width: 100px;
 }
 
 .app-icon img,
@@ -207,17 +208,6 @@ body.modal-open {
     transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), margin 0.2s;
     font-size: 2.2rem;
     overflow: hidden;
-}
-
-.app-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    text-align: center;
-    width: 100px;
 }
 
 .icon-wrapper {

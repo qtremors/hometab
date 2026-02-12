@@ -13,16 +13,14 @@ ENV/
 
 # Configuration and Assets
 .env
-backups/
-apps.json
-settings.json
-index.html
+src/backups/
+src/apps.json
+src/index.html
 
 # Generated assets
-assets/bookmarks/
-assets/icons/
-assets/wallapapers/
+src/assets/bookmarks/
+src/assets/icons/
+src/assets/wallpapers/
 
-# If you want to keep the final output index.html versioned:
-# (Uncomment the line below if you want to ignore the generated index.html)
-# index.html
+# Templates (used for doc generation, not needed in repo)
+Templates/

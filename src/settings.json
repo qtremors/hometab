@@ -1,0 +1,12 @@
+{
+    "settings": {
+        "wallpaper": "assets/wallpapers/Giselle.jpeg",
+        "clock_format": "12h",
+        "transparency": 0.3,
+        "blur_amount": "50px",
+        "clock_position": {
+            "top": "40px",
+            "left": "30%"
+        }
+    }
+}

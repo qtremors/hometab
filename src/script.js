@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragSrcEl = null;
 
     // --- Utilities ---
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
     function saveCurrentConfig() {
         const config = JSON.parse(localStorage.getItem('tabletConfig') || '{}');
         const apps = [];
@@ -99,9 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const getIconHTML = (icon) => {
             if (!icon) return '🌐';
             if (icon.startsWith('data:image') || icon.includes('.') || icon.startsWith('http')) {
-                return `<img src="${icon}" alt="icon">`;
+                return `<img src="${icon}" alt="icon" onerror="this.replaceWith(document.createTextNode('🌐'))">`;
             }
-            return icon;
+            return escapeHtml(icon);
         };
 
         // Clear UI containers
@@ -193,7 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function applySettings(s) {
         if (!s) return;
         const wp = document.querySelector('.wallpaper');
-        if (wp && s.wallpaper) wp.style.backgroundImage = `url('${s.wallpaper}')`;
+        if (wp && s.wallpaper) {
+            const safeUrl = s.wallpaper.replace(/['";()]/g, '');
+            wp.style.backgroundImage = `url('${safeUrl}')`;
+        }
 
         // Use CSS variables for real-time updates across all glass elements
         if (s.blur_amount) {
@@ -222,8 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wallpaperInput) wallpaperInput.value = s.wallpaper || '';
         if (blurInput) blurInput.value = parseInt(s.blur_amount) || 20;
         if (transparencyInput) transparencyInput.value = s.transparency || 0.1;
-        if (hqFaviconsSelect) hqFaviconsSelect.value = s.hq_favicons || 'off';
-        if (faviconSourceSelect) faviconSourceSelect.value = s.favicon_source || 'google';
 
         const isOpening = settingsModal.classList.contains('hidden');
         settingsModal.classList.toggle('hidden');
@@ -353,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drawerGrid.appendChild(newAppEl);
             saveCurrentConfig();
             newAppName.value = ''; newAppUrl.value = ''; newAppIcon.value = '';
-            location.reload();
+            syncAppsFromConfig();
         });
     }
 
@@ -370,14 +377,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const sourceHtml = dragSrcEl.innerHTML;
             const sourceName = dragSrcEl.getAttribute('data-name');
             const sourceUrl = dragSrcEl.getAttribute('data-url');
+            const sourceIcon = dragSrcEl.getAttribute('data-icon');
+            const sourceOrigIcon = dragSrcEl.getAttribute('data-original-icon');
             dragSrcEl.innerHTML = this.innerHTML;
             dragSrcEl.setAttribute('data-id', targetId);
             dragSrcEl.setAttribute('data-name', this.getAttribute('data-name'));
             dragSrcEl.setAttribute('data-url', this.getAttribute('data-url'));
+            dragSrcEl.setAttribute('data-icon', this.getAttribute('data-icon'));
+            dragSrcEl.setAttribute('data-original-icon', this.getAttribute('data-original-icon'));
             this.innerHTML = sourceHtml;
             this.setAttribute('data-id', sourceId);
             this.setAttribute('data-name', sourceName);
             this.setAttribute('data-url', sourceUrl);
+            this.setAttribute('data-icon', sourceIcon);
+            this.setAttribute('data-original-icon', sourceOrigIcon);
             saveCurrentConfig();
         }
         return false;
@@ -438,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contextApp.innerHTML = `<div class="icon-wrapper">${iconContent}</div><span class="app-label">${name}</span>`;
         drawerGrid.appendChild(contextApp);
         saveCurrentConfig();
-        location.reload();
+        syncAppsFromConfig();
     });
 
     menuDelete.addEventListener('click', () => {
@@ -446,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm(`Are you sure you want to delete ${contextApp.getAttribute('data-name')}?`)) {
             contextApp.remove();
             saveCurrentConfig();
-            location.reload();
+            syncAppsFromConfig();
         }
     });
 
@@ -455,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalIcon = contextApp.getAttribute('data-original-icon') || '🌐';
         contextApp.setAttribute('data-icon', originalIcon);
         saveCurrentConfig();
-        location.reload();
+        syncAppsFromConfig();
     });
 
     const openFaviconPicker = () => {
@@ -485,6 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contextApp.setAttribute('data-icon', src.url);
                 saveCurrentConfig();
                 faviconModal.classList.add('hidden');
+                syncAppsFromConfig();
                 location.reload();
             };
             faviconGrid.appendChild(div);
@@ -554,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 config.apps = [...config.apps, ...newApps];
                 localStorage.setItem('tabletConfig', JSON.stringify(config));
                 alert(`Imported ${newApps.length} new apps!`);
-                location.reload();
+                syncAppsFromConfig();
             };
             reader.readAsText(file);
         });
