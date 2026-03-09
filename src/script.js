@@ -190,24 +190,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const knownIds = new Set((config.apps || []).map(a => a.id));
             const newApps = [];
 
+            let hasChanges = false;
             document.querySelectorAll('.app-icon, .dock-item').forEach(el => {
                 const id = el.getAttribute('data-id');
-                if (id && !knownIds.has(id)) {
-                    newApps.push({
-                        id: id,
-                        name: el.getAttribute('data-name'),
-                        url: el.getAttribute('data-url'),
-                        icon: el.getAttribute('data-icon'),
-                        original_icon: el.getAttribute('data-original-icon'),
-                        docked: el.classList.contains('dock-item')
-                    });
+                const htmlIcon = el.getAttribute('data-icon');
+                
+                if (id) {
+                    const existingApp = config.apps.find(a => a.id === id);
+                    if (!existingApp) {
+                        // Brand new app
+                        newApps.push({
+                            id: id,
+                            name: el.getAttribute('data-name'),
+                            url: el.getAttribute('data-url'),
+                            icon: htmlIcon,
+                            original_icon: el.getAttribute('data-original-icon'),
+                            docked: el.classList.contains('dock-item')
+                        });
+                    } else if (htmlIcon && htmlIcon.startsWith('assets/icons/') && existingApp.icon !== htmlIcon) {
+                        // High-res icon detected in build, override the stale one in local storage
+                        existingApp.icon = htmlIcon;
+                        existingApp.original_icon = htmlIcon;
+                        hasChanges = true;
+                        console.log(`Updated ${id} to high-res icon from build.`);
+                    }
                 }
             });
 
-            if (newApps.length > 0) {
+            if (newApps.length > 0 || hasChanges) {
                 config.apps = [...(config.apps || []), ...newApps];
                 localStorage.setItem('tabletConfig', JSON.stringify(config));
-                console.log(`Merged ${newApps.length} new apps from build.`);
+                if (newApps.length > 0) console.log(`Merged ${newApps.length} new apps from build.`);
             }
         } catch (e) {
             console.error("LocalStorage error:", e);
@@ -464,6 +477,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (document.getElementById('set-auto-fetch')) {
+        document.getElementById('set-auto-fetch').addEventListener('change', (e) => updateSetting('auto_fetch_icons', e.target.checked));
+    }
+
     closeSettings.addEventListener('click', toggleSettings);
     if (clockFormatSelect) clockFormatSelect.addEventListener('change', (e) => updateSetting('clock_format', e.target.value));
     if (wallpaperInput) wallpaperInput.addEventListener('change', (e) => updateSetting('wallpaper', e.target.value));
@@ -613,22 +630,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const domain = (new URL(url)).hostname;
         const sources = [
-            { name: 'Google', url: `https://www.google.com/s2/favicons?domain=${domain}&sz=128` },
-            { name: 'DuckDuckGo', url: `https://icons.duckduckgo.com/ip3/${domain}.ico` },
-            { name: 'Favicon Horse', url: `https://favicon.horse/icon/${domain}` },
-            { name: 'Unavatar', url: `https://unavatar.io/${domain}` }
+            { name: 'Clearbit', url: `https://logo.clearbit.com/${domain}?size=256`, hq: true },
+            { name: 'Google (HQ)', url: `https://www.google.com/s2/favicons?domain=${domain}&sz=256`, hq: true },
+            { name: 'Icon Horse', url: `https://icon.horse/icon/${domain}`, hq: true },
+            { name: 'DuckDuckGo', url: `https://icons.duckduckgo.com/ip3/${domain}.ico`, hq: false },
+            { name: 'Unavatar', url: `https://unavatar.io/${domain}`, hq: false }
         ];
 
         faviconGrid.innerHTML = '';
         sources.forEach(src => {
             const div = document.createElement('div');
             div.className = 'favicon-option glass';
-            div.innerHTML = `<img src="${src.url}" alt="${src.name}"><span>${src.name}</span>`;
+            if (src.hq) div.classList.add('hq-source');
+            
+            div.innerHTML = `
+                <img src="${src.url}" alt="${src.name}">
+                <span>${src.name}</span>
+                ${src.hq ? '<div class="hq-badge">HQ</div>' : ''}
+            `;
+            
             div.onclick = () => {
                 contextApp.setAttribute('data-icon', src.url);
                 saveCurrentConfig();
                 faviconModal.classList.add('hidden');
                 syncAppsFromConfig();
+                // Instead of reload, just update the icon if possible, but reload is safer for images
                 location.reload();
             };
             faviconGrid.appendChild(div);

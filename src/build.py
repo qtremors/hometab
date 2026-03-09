@@ -13,8 +13,51 @@ import re
 import os
 import sys
 import shutil
+import urllib.request
 from pathlib import Path
 from datetime import datetime
+
+
+# ── Icon Downloading ──────────────────────────────────────────────────────────
+
+def download_icon(url, domain, icons_dir):
+    """Download an icon from a URL and save it locally."""
+    if not url or url == "🌐" or url.startswith('data:'):
+        return None
+
+    icons_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Try common extensions, fallback to .png
+    ext = ".png"
+    if ".svg" in url.lower(): ext = ".svg"
+    elif ".ico" in url.lower(): ext = ".ico"
+    elif ".webp" in url.lower(): ext = ".webp"
+    
+    local_path = icons_dir / f"{domain}{ext}"
+    
+    if local_path.exists():
+        return f"assets/icons/{local_path.name}"
+
+    try:
+        print(f"    Downloading icon: {domain}...")
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            with open(local_path, 'wb') as f:
+                f.write(response.read())
+        return f"assets/icons/{local_path.name}"
+    except Exception as e:
+        print(f"    Warning: Could not download icon for {domain}: {e}")
+        return None
+
+
+def get_local_icon(domain, icons_dir):
+    """Check if a local icon exists for the domain."""
+    for ext in ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico']:
+        test_path = icons_dir / f"{domain}{ext}"
+        if test_path.exists():
+            return f"assets/icons/{test_path.name}"
+    return None
 
 
 # ── Bookmark Parsing ──────────────────────────────────────────────────────────
@@ -235,10 +278,13 @@ def main():
     template_file = script_dir / "template.html"
     output_file = script_dir / "index.html"
     backup_dir = script_dir / "backups"
+    icons_dir = script_dir / "assets" / "icons"
 
-    # Allow custom bookmark path via CLI arg
-    if len(sys.argv) > 1:
-        bookmark_file = Path(sys.argv[1]).resolve()
+    # CLI Arguments
+    fetch_icons_flag = "--fetch-icons" in sys.argv
+    custom_bookmark = next((Path(arg).resolve() for arg in sys.argv[1:] if not arg.startswith('--')), None)
+    if custom_bookmark:
+        bookmark_file = custom_bookmark
 
     print("Hometab Build")
     print("─" * 40)
@@ -262,6 +308,43 @@ def main():
         apps = parse_bookmarks(str(bookmark_file))
         print(f"  Found {len(apps)} bookmarks")
     
+    # Load settings to check for auto_fetch_icons
+    auto_fetch = fetch_icons_flag
+    if not auto_fetch and settings_file.exists():
+        try:
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                settings_data = json.load(f).get('settings', {})
+                auto_fetch = settings_data.get('auto_fetch_icons', False)
+        except: pass
+
+    # Step 2: High-Resolution Icon Processing
+    if apps and (auto_fetch or any(get_local_icon(re.sub(r'^https?://(www\.)?', '', app.get('url', '')).split('/')[0], icons_dir) for app in apps)):
+        print("  Processing high-res icons...")
+        icons_dir.mkdir(parents=True, exist_ok=True)
+        for app in apps:
+            url = app.get('url', '')
+            if not url or url == '#': continue
+            
+            domain = re.sub(r'^https?://(www\.)?', '', url).split('/')[0]
+            if not domain: continue
+
+            # Check for local override first
+            local_icon = get_local_icon(domain, icons_dir)
+            
+            if local_icon:
+                app['icon'] = local_icon
+            elif auto_fetch:
+                # Try to download from Clearbit or Google if no local icon
+                hq_url = f"https://logo.clearbit.com/{domain}?size=256"
+                downloaded = download_icon(hq_url, domain, icons_dir)
+                if not downloaded:
+                    # Fallback to Google HQ
+                    hq_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=256"
+                    downloaded = download_icon(hq_url, domain, icons_dir)
+                
+                if downloaded:
+                    app['icon'] = downloaded
+
     # Save apps.json for the runtime
     if apps:
         try:
@@ -283,10 +366,10 @@ def main():
     else:
         print("  No bookmarks source found.")
         print(f"  Place your bookmarks export at: {bookmark_file}")
-        print("  Or export selection to: {clean_bookmarks_file}")
+        print(f"  Or export selection to: {clean_bookmarks_file}")
         print("  Building with Settings app only...")
 
-    # Step 2: Build index.html
+    # Step 3: Build index.html
     print(f"  Building: {output_file.name}")
     success = build_index(apps, str(settings_file), str(template_file), str(output_file))
 

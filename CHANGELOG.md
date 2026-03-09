@@ -1,8 +1,27 @@
 # Hometab Changelog
 
 > **Project:** Hometab  
-> **Version:** 1.1.0  
+> **Version:** 1.2.0  
 > **Last Updated:** 2026-03-09
+
+---
+
+## [1.2.0] - 2026-03-09
+
+### Added
+- **High-Resolution Icon System**: Automated build-time downloader for crisp app logos.
+- **Enhanced Favicon Picker**: Added high-quality sources including Clearbit and Icon Horse with "HQ" visual badges.
+- **Auto-fetch Setting**: New toggle in Settings to control automated icon downloading during build.
+- **CLI Flag**: Added `--fetch-icons` to `build.py` for manual high-res icon retrieval.
+- **Local Icon Storage**: Icons are now saved to and served from `src/assets/icons/`.
+
+### Changed
+- **Smarter UI Sync**: Dashboard now automatically detects high-res icons in the build and overrides blurry cached versions in `localStorage`.
+- **Improved Build Script**: Enhanced CLI argument parsing and modularized icon processing.
+
+### Fixed
+- Blurry icons persisting in the UI even after a re-build with high-res sources.
+- Domain parsing issues for certain icon API requests.
 
 ---
 

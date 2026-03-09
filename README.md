@@ -127,7 +127,7 @@ hometab/
 
 ## 📄 License
 
-**Tremors Source License (TSL)** - Source-available license allowing viewing, forking, and derivative works with **mandatory attribution**. Commercial use requires written permission.
+**Tremors Source License (TSL) Version 2.0** - Source-available license allowing viewing, forking, and derivative works with **mandatory attribution**. Commercial use requires written permission.
 
 See [LICENSE.md](LICENSE.md) for full terms.
 
