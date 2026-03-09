@@ -26,6 +26,7 @@
 | Feature | Description |
 |---------|-------------|
 | 📱 **App Drawer** | Scroll down to reveal all bookmarks as app icons, with fuzzy search |
+| 🖱️ **Selection Mode** | Interactively pick which bookmarks to keep; exports a clean JSON for the build script |
 | 🔲 **Dock** | Pin frequently used apps to a macOS-style dock with magnification on hover |
 | 🔄 **Drag & Drop** | Reorder dock items by dragging |
 | 📋 **Context Menu** | Right-click to pin/unpin, delete, change favicon, or restore original icon |
@@ -52,7 +53,7 @@ Export your bookmarks from your browser (Bookmarks → Bookmark Manager → Expo
 src/assets/bookmarks/bookmarks.html
 ```
 
-### 2. Build
+### 2. Build (Initial)
 
 ```bash
 python src/build.py
@@ -60,7 +61,17 @@ python src/build.py
 
 This parses your bookmarks and generates `src/index.html`.
 
-### 3. Set as homepage
+### 3. Clean up (Selection Mode)
+
+If you have too many bookmarks and want to pick only a few:
+1. Open `src/index.html` in your browser.
+2. Go to **Settings** → Toggle **Selection Mode**.
+3. Click the apps you want to keep.
+4. Click **Extract Selection** to download `bookmarks_clean.json`.
+5. Move `bookmarks_clean.json` to `src/assets/bookmarks/`.
+6. Run `python src/build.py` again.
+
+### 4. Set as homepage
 
 - **Chrome/Brave**: Settings → On startup → Open a specific page → Add `file:///path/to/hometab/src/index.html`
 - Or use a "Custom New Tab" extension to point to the file.

@@ -1,8 +1,27 @@
 # Hometab Changelog
 
 > **Project:** Hometab  
-> **Version:** 1.0.0  
-> **Last Updated:** 2026-02-12
+> **Version:** 1.1.0  
+> **Last Updated:** 2026-03-09
+
+---
+
+## [1.1.0] - 2026-03-09
+
+### Added
+- **Interactive Selection Mode**: A new UI feature to visually pick which bookmarks to keep as apps.
+- **Selection Extraction**: Export chosen apps to `bookmarks_clean.json` directly from the dashboard.
+- **Selection Mode UI**: Sticky banner with item count and "Extract Selection" button.
+- **Reset Layout Button**: "Reset App Layout" option in Settings to clear cache and reload from the latest build.
+
+### Changed
+- **Smart Build Pipeline**: `src/build.py` now prioritizes `bookmarks_clean.json` as the input source if present.
+- **Intelligent UI Sync**: Dashboard now merges new build data into `localStorage` automatically.
+- **Documentation Refactor**: Updated `README.md` and `DEVELOPMENT.md` with the new selection workflow.
+
+### Fixed
+- Stale `localStorage` preventing new apps from appearing after a rebuild.
+- Build script failing to save `apps.json` if sources were partially missing.
 
 ---
 

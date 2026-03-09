@@ -23,12 +23,12 @@
 Hometab follows a **static build pipeline** architecture:
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                      Build Layer (Python)                     │
-│   Parses bookmarks.html → generates apps.json → index.html  │
-└──────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            Build Layer (Python)                              │
+│   Parses bookmarks.html OR bookmarks_clean.json → apps.json → index.html     │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                    Template Layer (HTML)                      │
 │   template.html + settings.json + apps data → index.html    │
@@ -47,7 +47,7 @@ Hometab follows a **static build pipeline** architecture:
 |----------|-----------|
 | Static HTML (no server) | Opens instantly as browser homepage via `file://` protocol |
 | localStorage for runtime state | No server needed; state persists across sessions |
-| Python build step | Parses browser bookmark exports (HTML format) and bakes data into HTML |
+| Python build step | Parses browser bookmark exports (HTML format) or clean JSON selections and bakes data into HTML |
 | Single-file output | Browser homepage must be a single `index.html` with embedded CSS/JS references |
 | Glassmorphic UI | Modern, visually appealing tablet-like experience |
 
@@ -102,7 +102,7 @@ The unified build script handles the entire pipeline:
 
 | Function | Description |
 |----------|-------------|
-| `parse_bookmarks(file_path)` | Parses browser bookmark HTML export into app dicts |
+| `parse_bookmarks(file_path)` | Parses browser bookmark HTML export or `bookmarks_clean.json` into app dicts |
 | `get_icon_html(icon_val)` | Converts icon values to HTML with broken-image fallback |
 | `build_index(apps, settings, template, output)` | Generates final `index.html` from template and data |
 | `main()` | CLI entry point with path resolution and error handling |

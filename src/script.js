@@ -178,8 +178,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeLocalStorage() {
-        if (!localStorage.getItem('tabletConfig')) {
-            saveCurrentConfig();
+        try {
+            const existingConfig = localStorage.getItem('tabletConfig');
+            if (!existingConfig) {
+                saveCurrentConfig();
+                return;
+            }
+
+            // If config exists, check for new apps in the HTML that aren't in localStorage
+            const config = JSON.parse(existingConfig);
+            const knownIds = new Set((config.apps || []).map(a => a.id));
+            const newApps = [];
+
+            document.querySelectorAll('.app-icon, .dock-item').forEach(el => {
+                const id = el.getAttribute('data-id');
+                if (id && !knownIds.has(id)) {
+                    newApps.push({
+                        id: id,
+                        name: el.getAttribute('data-name'),
+                        url: el.getAttribute('data-url'),
+                        icon: el.getAttribute('data-icon'),
+                        original_icon: el.getAttribute('data-original-icon'),
+                        docked: el.classList.contains('dock-item')
+                    });
+                }
+            });
+
+            if (newApps.length > 0) {
+                config.apps = [...(config.apps || []), ...newApps];
+                localStorage.setItem('tabletConfig', JSON.stringify(config));
+                console.log(`Merged ${newApps.length} new apps from build.`);
+            }
+        } catch (e) {
+            console.error("LocalStorage error:", e);
         }
     }
 
@@ -323,16 +354,115 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Selection Mode Logic ---
+    let isSelectionMode = false;
+    const selectionToggle = document.getElementById('toggle-selection-mode');
+    const selectionBanner = document.getElementById('selection-banner');
+    const extractBtn = document.getElementById('extract-selection');
+    const cancelSelectionBtn = document.getElementById('cancel-selection');
+
+    function toggleSelectionMode(enabled) {
+        isSelectionMode = enabled;
+        document.body.classList.toggle('selection-mode', enabled);
+        selectionBanner.classList.toggle('hidden', !enabled);
+        
+        if (selectionToggle) selectionToggle.checked = enabled;
+
+        if (!enabled) {
+            // Clear selections
+            document.querySelectorAll('.app-icon.selected, .dock-item.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            updateExtractCount();
+        } else {
+            // Close settings if opening selection mode
+            if (!settingsModal.classList.contains('hidden')) {
+                toggleSettings();
+            }
+        }
+    }
+
+    function updateExtractCount() {
+        if (!extractBtn) return;
+        const count = document.querySelectorAll('.app-icon.selected, .dock-item.selected').forEach ? 
+                      document.querySelectorAll('.app-icon.selected, .dock-item.selected').length : 0;
+        extractBtn.textContent = `Extract Selection (${count})`;
+    }
+
+    if (selectionToggle) {
+        selectionToggle.addEventListener('change', (e) => toggleSelectionMode(e.target.checked));
+    }
+
+    if (cancelSelectionBtn) {
+        cancelSelectionBtn.addEventListener('click', () => toggleSelectionMode(false));
+    }
+
+    if (extractBtn) {
+        extractBtn.addEventListener('click', () => {
+            const selectedApps = [];
+            const ids = new Set();
+
+            document.querySelectorAll('.app-icon.selected, .dock-item.selected').forEach(el => {
+                const id = el.getAttribute('data-id');
+                if (ids.has(id)) return;
+                ids.add(id);
+
+                selectedApps.push({
+                    id: id,
+                    name: el.getAttribute('data-name'),
+                    url: el.getAttribute('data-url'),
+                    icon: el.getAttribute('data-icon'),
+                    original_icon: el.getAttribute('data-original-icon'),
+                    docked: el.classList.contains('dock-item')
+                });
+            });
+
+            if (selectedApps.length === 0) {
+                alert("Please select at least one app to extract.");
+                return;
+            }
+
+            const dataStr = JSON.stringify(selectedApps, null, 4);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bookmarks_clean.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert("Extraction complete! Save 'bookmarks_clean.json' to 'src/assets/bookmarks/' and run the build script again.");
+            toggleSelectionMode(false);
+        });
+    }
+
     // --- Events & Navigation ---
     document.addEventListener('click', (e) => {
         const app = e.target.closest('.app-icon, .dock-item');
         if (app) {
             const id = app.getAttribute('data-id');
             if (id === 'settings') { toggleSettings(); return; }
+
+            if (isSelectionMode) {
+                app.classList.toggle('selected');
+                updateExtractCount();
+                return;
+            }
+
             const url = app.getAttribute('data-url');
             if (url && url !== '#') window.open(url, '_blank');
         }
     });
+
+    const resetBtn = document.getElementById('reset-config');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (confirm("Reset layout to build version? This will clear pins and manual reordering.")) {
+                localStorage.removeItem('tabletConfig');
+                location.reload();
+            }
+        });
+    }
 
     closeSettings.addEventListener('click', toggleSettings);
     if (clockFormatSelect) clockFormatSelect.addEventListener('change', (e) => updateSetting('clock_format', e.target.value));

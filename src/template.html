@@ -12,6 +12,14 @@
     <div id="screen">
         <div class="wallpaper" WALLPAPER_STYLE_PLACEHOLDER></div>
 
+        <div id="selection-banner" class="hidden">
+            <span class="banner-text">Selection Mode Active</span>
+            <div style="display: flex; gap: 10px;">
+                <button id="extract-selection" class="btn-extract">Extract Selection (0)</button>
+                <button id="cancel-selection" class="btn-cancel">Exit</button>
+            </div>
+        </div>
+
         <main id="homepage">
             <div class="date-time" draggable="true" id="draggable-clock" CLOCK_STYLE_PLACEHOLDER>
                 <h1 id="clock">12:00</h1>
@@ -63,6 +71,10 @@
                         <label>Transparency</label>
                         <input type="range" id="set-transparency" min="0" max="1" step="0.05" class="slider">
                     </div>
+                    <div class="setting-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.02);">
+                        <label style="cursor: pointer;" for="toggle-selection-mode">Selection Mode (Select Apps to Keep)</label>
+                        <input type="checkbox" id="toggle-selection-mode" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
                 </div>
                 <div class="settings-actions">
                     <button id="export-json" class="glass">Export Config</button>
@@ -72,6 +84,7 @@
                     <label for="import-bookmarks" class="glass btn">Import Bookmarks</label>
                     <input type="file" id="import-bookmarks" accept=".html" style="display:none">
 
+                    <button id="reset-config" class="glass danger" style="color: #ff5555;">Reset App Layout</button>
                     <button id="close-settings" class="glass">Close</button>
                 </div>
 

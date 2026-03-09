@@ -229,6 +229,7 @@ def main():
     script_dir = Path(__file__).parent.resolve()
 
     bookmark_file = script_dir / "assets" / "bookmarks" / "bookmarks.html"
+    clean_bookmarks_file = script_dir / "assets" / "bookmarks" / "bookmarks_clean.json"
     apps_file = script_dir / "apps.json"
     settings_file = script_dir / "settings.json"
     template_file = script_dir / "template.html"
@@ -245,14 +246,24 @@ def main():
     # Step 0: Backup existing files
     backup_existing(apps_file, output_file, backup_dir)
 
-    # Step 1: Parse bookmarks
+    # Step 1: Parse bookmarks or load clean JSON
     apps = []
-    if bookmark_file.exists():
+    if clean_bookmarks_file.exists():
+        print(f"  Using clean selection: {clean_bookmarks_file.name}")
+        try:
+            with open(clean_bookmarks_file, 'r', encoding='utf-8') as f:
+                apps = json.load(f)
+            print(f"  Loaded {len(apps)} selected apps")
+        except Exception as e:
+            print(f"  Error: Could not read {clean_bookmarks_file.name}: {e}")
+            return 1
+    elif bookmark_file.exists():
         print(f"  Parsing bookmarks: {bookmark_file.name}")
         apps = parse_bookmarks(str(bookmark_file))
         print(f"  Found {len(apps)} bookmarks")
-
-        # Save apps.json
+    
+    # Save apps.json for the runtime
+    if apps:
         try:
             with open(apps_file, 'w', encoding='utf-8') as f:
                 json.dump(apps, f, indent=4)
@@ -261,7 +272,7 @@ def main():
             print(f"  Warning: Could not save {apps_file.name}: {e}")
     elif apps_file.exists():
         # No bookmarks file, but apps.json exists from a previous run
-        print(f"  No bookmarks file found, using existing {apps_file.name}")
+        print(f"  No source found, using existing {apps_file.name}")
         try:
             with open(apps_file, 'r', encoding='utf-8') as f:
                 apps = json.load(f)
@@ -270,8 +281,9 @@ def main():
             print(f"  Error: Could not read {apps_file.name}: {e}")
             return 1
     else:
-        print("  No bookmarks file or apps.json found.")
+        print("  No bookmarks source found.")
         print(f"  Place your bookmarks export at: {bookmark_file}")
+        print("  Or export selection to: {clean_bookmarks_file}")
         print("  Building with Settings app only...")
 
     # Step 2: Build index.html

@@ -9,6 +9,7 @@
 ## 📋 To Do
 
 ### High Priority
+- [x] **Interactive Selection Mode** → Visually pick bookmarks to keep and rebuild clean
 - [ ] Split `script.js` into ES modules (`clock.js`, `drawer.js`, `dock.js`, `settings.js`)
 
 ### Medium Priority

@@ -332,6 +332,92 @@ body.modal-open {
     border: none;
 }
 
+/* --- Selection Mode --- */
+.selection-mode .app-icon, .selection-mode .dock-item {
+    cursor: cell;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.selection-mode .app-icon:hover, .selection-mode .dock-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.app-icon.selected, .dock-item.selected {
+    border: 2px solid #4ade80 !important;
+    background: rgba(74, 222, 128, 0.2) !important;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.4) !important;
+}
+
+.app-icon.selected::after, .dock-item.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #4ade80;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+#selection-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 15px 25px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 2000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    color: white;
+    transition: top 0.3s ease;
+}
+
+#selection-banner.hidden {
+    top: -100px;
+}
+
+.banner-text {
+    font-weight: 500;
+}
+
+.btn-extract {
+    background: #4ade80;
+    color: #000;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-extract:hover {
+    transform: scale(1.05);
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
 /* Animations / States */
 #screen.drawer-open #homepage {
     transform: translateY(-50vh) scale(0.9);
